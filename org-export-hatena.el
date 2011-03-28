@@ -75,32 +75,30 @@ org ドキュメント中の ul リストは，次の制約を満たしている
   (save-excursion
     (goto-char (point-min))
 
-    (lexical-let ((prev-org-indent nil)
-                  (cur-org-indent nil)
-                  (prev-hatena-indent 0))
-      (while (not (eq (point) (point-max)))
-        (setq prev-org-indent (org-export-hatena-prev-org-ul-list-indentation)
-              cur-org-indent (org-export-hatena-org-ul-list-in-line-indentation))
-        (if cur-org-indent
-            (progn
-              (setq prev-hatena-indent
-                    (if prev-org-indent
-                        (+ prev-hatena-indent
-                           (/ (print (- cur-org-indent prev-org-indent))  2))
-                      1))
-              ;; ここで `prev-hatena-indent' に，現在行をどれだけインデントすべきかが
-              ;; 格納されています．
+    (setq org-export-prev-hatena-indent 0)
+    (while (not (eq (point) (point-max)))
+      (setq org-export-prev-org-indent (org-export-hatena-prev-org-ul-list-indentation)
+            org-export-cur-org-indent (org-export-hatena-org-ul-list-in-line-indentation))
+      (if org-export-cur-org-indent
+          (progn
+            (setq org-export-prev-hatena-indent
+                  (if org-export-prev-org-indent
+                      (+ org-export-prev-hatena-indent
+                         (/ (- org-export-cur-org-indent org-export-prev-org-indent)) 2))
+                    1))
+            ;; ここで `org-export-prev-hatena-indent' に，現在行をどれだけインデントすべきかが
+            ;; 格納されています．
 
-              (beginning-of-line nil)
-              (re-search-forward "^\\([ \t\f]*\\)-\\(.*\\)$" nil t)
+            (beginning-of-line nil)
+            (re-search-forward "^\\([ \t\f]*\\)-\\(.*\\)$" nil t)
 
-              (replace-match
-               (concat
-                (match-string 1)
-                (make-string prev-hatena-indent ?-)
-                (match-string 2)))))
+            (replace-match
+             (concat
+              (match-string 1)
+              (make-string org-export-prev-hatena-indent ?-)
+              (match-string 2)))))
 
-        (forward-line 1)))
+      (forward-line 1))
 
     ;; このままだと，ラインの各要素の行頭のスペースがとれていません
     (goto-char (point-min))
@@ -129,8 +127,8 @@ org ドキュメント中の ul リストは，次の制約を満たしている
       (org-export-hatena-begin-to-end quote)
       (org-export-hatena-begin-to-end s-pre)
       (org-export-hatena-begin-to-end src)
-      (org-export-hatena-section)
       (org-export-hatena-begin-to-end-org-ul-list)
+      (org-export-hatena-section)
       (setq diary (buffer-substring (point-min) (point-max))))
     (simple-hatena simple-hatena-default-id)
     (simple-hatena-mode)
