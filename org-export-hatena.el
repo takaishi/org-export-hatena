@@ -137,3 +137,6 @@ org ドキュメント中の ul リストは，次の制約を満たしている
     (goto-char (point-min))
     (newline)
     (insert diary)))
+
+
+(provide 'org-export-hatena)
