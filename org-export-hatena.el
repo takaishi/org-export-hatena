@@ -1,14 +1,24 @@
 (defvar org-export-hatena-notation-section "^\\*\\ \\([^\t\n\r\f]*\\)$")
 (defvar org-export-hatena-notation-subsection "^\\*\\* \\[.*\\]+ \\([^\t\n\r\f]*\\)$")
 (defvar org-export-hatena-notation-subsubsection "^\\*\\*\\* \\[.*\\]+ \\([^\t\n\r\f]*\\)$")
-(defvar org-export-hatena-notation-quote '("[ ]*#\\+BEGIN_QUOTE" ">>" "[ ]*#\\+END_QUOTE" "<<"))
-(defvar org-export-hatena-notation-super-pre '("[ ]*#\\+BEGIN_EXAMPLE" ">||" "[ ]*#\\+END_EXAMPLE" "||<"))
-(defvar org-export-hatena-notation-src '("[ ]*#\\+BEGIN_SRC" ">||" "[ ]*#\\+END_SRC" "||<"))
+
+(defvar org-export-hatena-notation-quote-1 '("[ ]*#\\+BEGIN_QUOTE" ">>"))
+(defvar org-export-hatena-notation-quote-2 '("[ ]*#\\+END_QUOTE" "<<"))
+
+(defvar org-export-hatena-notation-super-pre-1 '("[ ]*#\\+BEGIN_EXAMPLE" ">||"))
+(defvar org-export-hatena-notation-super-pre-2 '("[ ]*#\\+END_EXAMPLE" "||<"))
+
+(defvar org-export-hatena-notation-src-1
+  '("[ ]*#\\+BEGIN_SRC\\([ ]+\\([a-z0-9]+\\)\\)?" ">|\\2|"))
+(defvar org-export-hatena-notation-src-2 '("[ ]*#\\+END_SRC" "||<"))
+
+(defvar org-export-hatena-notation-bold
+  '("\\*\\([^* \t\n\r\f][^*]*[^* \t\n\r\f]\\)\\*" "<span style=\"font-weight:bold;\">\\1</span>"))
 
 (defun org-export-hatena-section ()
   (let ((section org-export-hatena-notation-section)
-	(subsection org-export-hatena-notation-subsection)
-	(subsubsection org-export-hatena-notation-subsubsection))
+        (subsection org-export-hatena-notation-subsection)
+        (subsubsection org-export-hatena-notation-subsubsection))
     (goto-char (point-min))
     (while (re-search-forward subsection nil t)
       (replace-match "*t* \\1"))))
@@ -84,7 +94,7 @@ org ドキュメント中の ul リストは，次の制約を満たしている
             (setq org-export-prev-hatena-indent
                   (if org-export-prev-org-indent
                       (+ org-export-prev-hatena-indent
-                         (/ (- org-export-cur-org-indent org-export-prev-org-indent)) 2))
+                         (/ (- org-export-cur-org-indent org-export-prev-org-indent) 2))
                     1))
             ;; ここで `org-export-prev-hatena-indent' に，現在行をどれだけインデントすべきかが
             ;; 格納されています．
@@ -108,25 +118,31 @@ org ドキュメント中の ul リストは，次の制約を満たしている
 (defun org-export-hatena-begin-to-end (notation)
   (goto-char (point-min))
   (while (re-search-forward (nth 0 notation) nil t)
-    (replace-match (nth 1 notation)))
-  (goto-char (point-min))
-  (while (re-search-forward (nth 2 notation) nil t)
-    (replace-match (nth 3 notation))))
+    (replace-match (nth 1 notation))))
 
 
 (defun org-export-hatena (beg end)
   (interactive "r")
   
-  (let ((diary (buffer-substring beg end))
-	(quote org-export-hatena-notation-quote)
-	(s-pre org-export-hatena-notation-super-pre)
-	(src org-export-hatena-notation-src))
+  (let ((diary (buffer-substring beg end)))
     (with-temp-buffer
       (pop-to-buffer (current-buffer))
       (insert diary)
-      (org-export-hatena-begin-to-end quote)
-      (org-export-hatena-begin-to-end s-pre)
-      (org-export-hatena-begin-to-end src)
+      (org-export-hatena-begin-to-end
+       org-export-hatena-notation-quote-1)
+      (org-export-hatena-begin-to-end
+       org-export-hatena-notation-quote-2)
+      (org-export-hatena-begin-to-end
+       org-export-hatena-notation-super-pre-1)
+      (org-export-hatena-begin-to-end
+       org-export-hatena-notation-super-pre-2)
+      (org-export-hatena-begin-to-end
+       org-export-hatena-notation-src-1)
+      (org-export-hatena-begin-to-end
+       org-export-hatena-notation-src-2)
+      (org-export-hatena-begin-to-end
+       org-export-hatena-notation-bold)
+
       (org-export-hatena-begin-to-end-org-ul-list)
       (org-export-hatena-section)
       (setq diary (buffer-substring (point-min) (point-max))))
