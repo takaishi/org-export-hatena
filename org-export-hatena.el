@@ -16,7 +16,7 @@
   '("\\*\\([^* \t\n\r\f][^*]*[^* \t\n\r\f]\\)\\*" "<span style=\"font-weight:bold;\">\\1</span>"))
 
 (defvar org-export-hatena-notation-url
-  '("\\[\\[\\(.*?\\)\\]\\[\\(.+?\\)\\]" "<a href=\"\\1\">\\2</a>"))
+  '("\\[\\[\\(.*?\\)\\]\\[\\(.+?\\)\\]\\]" "<a href=\"\\1\">\\2</a>"))
 
 (defun org-export-hatena-section ()
   (let ((section org-export-hatena-notation-section)
